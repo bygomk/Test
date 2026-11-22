@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#292622">
+<title>Dear — Typewriter v0.2</title>
+<style>
+:root{
+  --paper:#b9b0a0; --ink:#29251f; --rail-y:68%;
+  --lamp-x:50%; --lamp-y:43%;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#282521}
+body{font-family:Georgia,serif;color:#e5dfd3;overscroll-behavior:none}
+.app{position:relative;width:100%;height:100dvh;min-height:520px;overflow:hidden;background:
+ radial-gradient(ellipse at 50% 115%,rgba(0,0,0,.05),rgba(0,0,0,.52) 70%),
+ linear-gradient(110deg,#39342e,#292622 62%,#35302a)}
+.paper{
+ position:absolute;inset:0 0 31% 0;
+ background-color:#81796d;
+ background-image:
+  radial-gradient(ellipse at 50% 48%,rgba(211,196,166,.10),transparent 58%),
+  radial-gradient(ellipse at 8% 12%,rgba(28,24,20,.23),transparent 42%),
+  radial-gradient(ellipse at 92% 82%,rgba(25,22,19,.24),transparent 46%),
+  linear-gradient(115deg,rgba(255,255,255,.035),transparent 38%,rgba(20,17,14,.10));
+ box-shadow:0 12px 40px rgba(0,0,0,.28);
+}
+.paper:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.2;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");mix-blend-mode:soft-light}
+.paper:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;background:
+ repeating-linear-gradient(7deg,transparent 0 17px,rgba(45,35,25,.10) 18px,transparent 19px 43px),
+ repeating-linear-gradient(97deg,transparent 0 29px,rgba(255,245,220,.08) 30px,transparent 31px 61px);mix-blend-mode:overlay}
+.status{position:absolute;z-index:5;top:env(safe-area-inset-top,0px);left:0;right:0;height:42px;padding:12px 6%;display:flex;justify-content:space-between;font:14px Georgia,serif;letter-spacing:.08em;color:#e5dfd3;text-shadow:0 1px 4px #332d27}
+.toolbar{position:absolute;z-index:6;top:calc(env(safe-area-inset-top,0px) + 55px);left:7%;right:7%;display:flex;align-items:center;justify-content:space-between;color:#e7e0d4}
+.tool{border:0;background:transparent;color:inherit;font-size:27px;padding:4px 0;line-height:1;cursor:pointer}
+.count{font:16px "Courier New",monospace;letter-spacing:.12em;color:#e8e0d2}
+.editor-wrap{position:absolute;z-index:2;top:calc(env(safe-area-inset-top,0px) + 118px);left:22%;right:9%;bottom:32%;overflow:hidden}
+#letter{width:100%;height:100%;resize:none;border:0;outline:0;background:transparent;color:#26221d;
+ font-family:"Courier New",Courier,monospace;font-size:clamp(18px,5.2vw,24px);font-weight:700;line-height:1.28;letter-spacing:-.045em;
+ text-shadow:0 .3px rgba(0,0,0,.25);white-space:pre-wrap;overflow:auto;caret-color:#33291f;padding:0 0 30px;
+ -webkit-appearance:none;appearance:none}
+#letter::placeholder{color:rgba(41,37,31,.52)}
+.rail{position:absolute;z-index:4;left:0;right:0;top:var(--rail-y);height:56px;transform:translateY(-50%);
+ background:linear-gradient(180deg,#080909,#252626 38%,#080909 78%,#151515);box-shadow:0 8px 16px #0008}
+.rail:before,.rail:after{content:"";position:absolute;top:-5px;width:28px;height:66px;background:linear-gradient(90deg,#080909,#252525,#090909);border-radius:3px}
+.rail:before{left:1%}.rail:after{right:1%}
+.carriage{position:absolute;z-index:5;top:var(--rail-y);left:50%;width:184px;height:78px;transform:translate(-50%,-50%);border-radius:44px;
+ background:linear-gradient(145deg,#454440,#292826 70%);box-shadow:inset 0 2px 4px #7775,0 8px 16px #0009;transition:left .16s ease}
+.carriage:before{content:"";position:absolute;left:50%;top:-36px;width:6px;height:39px;transform:translateX(-50%);background:linear-gradient(90deg,#171717,#555,#171717)}
+.carriage:after{content:"";position:absolute;left:50%;top:-42px;transform:translateX(-50%);width:36px;height:9px;border-radius:1px;background:linear-gradient(#111,#333);box-shadow:0 2px 3px #0008}
+.lights{position:absolute;left:22px;top:34px;display:flex;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:#5f3026;box-shadow:0 0 3px #000}
+.dot:first-child{background:#78c96b;box-shadow:0 0 7px #76d36d}
+.dot:nth-child(2){background:#ff9d36}
+.lamp-beam{position:absolute;z-index:1;left:var(--lamp-x);top:var(--rail-y);width:min(112vw,650px);height:min(66vh,650px);transform:translate(-50%,-100%);pointer-events:none;
+ background:radial-gradient(ellipse at 50% 100%,rgba(255,239,194,.34) 0%,rgba(255,232,181,.23) 20%,rgba(255,225,169,.11) 43%,rgba(255,222,164,.035) 66%,transparent 78%);
+ filter:blur(17px);mix-blend-mode:screen}
+.more{position:absolute;z-index:7;right:8%;bottom:calc(env(safe-area-inset-bottom,0px) + 7%);width:68px;height:68px;border-radius:50%;border:1px solid #d8c8ad;background:rgba(196,181,157,.65);color:#e9dfce;font-size:27px;box-shadow:0 4px 16px #0005}
+.hint{position:absolute;z-index:7;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 2%);text-align:center;font:11px "Courier New",monospace;color:#d6cbb9aa;letter-spacing:.08em;pointer-events:none}
+@media(max-height:650px){.editor-wrap{bottom:35%}.rail{top:65%}.carriage{top:65%}}
+</style>
+</head>
+<body>
+<main class="app">
+ <div class="paper"></div><div class="lamp-beam"></div>
+ <div class="status"><span>4:25 AM</span><span>▰ 10%</span></div>
+ <nav class="toolbar">
+  <button class="tool" aria-label="Back" id="back">‹</button>
+  <span class="count" id="count">0 / 3,000</span>
+  <button class="tool" aria-label="Share" id="share">⇧</button>
+ </nav>
+ <section class="editor-wrap">
+  <textarea id="letter" maxlength="3000" spellcheck="false" autocapitalize="sentences" placeholder="Dear..."></textarea>
+ </section>
+ <div class="rail"></div>
+ <div class="carriage" id="carriage"><div class="lights"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div></div>
+ <button class="more" id="more" aria-label="More">•••</button>
+ <div class="hint">TAP THE PAPER TO BEGIN</div>
+</main>
+<script>
+const field=document.getElementById('letter'), count=document.getElementById('count'), carriage=document.getElementById('carriage');
+const app=document.querySelector('.app');
+function update(){
+ const n=field.value.length; count.textContent=`${n.toLocaleString('en-US')} / 3,000`;
+ const lines=field.value.split('\\n'); const last=lines[lines.length-1];
+ const max=Math.max(1,field.clientWidth/13);
+ const estimated=Math.min(1,(last.length%Math.floor(max))/Math.floor(max));
+ const x=22+estimated*56;
+ carriage.style.left=`${x}%`;
+ const y=Math.max(22,Math.min(55,22+Math.min(lines.length-1,5)*4));
+ document.documentElement.style.setProperty('--lamp-x',`${x}%`);
+ document.documentElement.style.setProperty('--lamp-y',`${y}%`);
+}
+field.addEventListener('input',update);
+field.addEventListener('focus',()=>document.querySelector('.hint').style.opacity='.25');
+document.getElementById('share').addEventListener('click',async()=>{
+ if(navigator.share){try{await navigator.share({title:'Dear',text:field.value})}catch(e){}}
+ else if(navigator.clipboard){await navigator.clipboard.writeText(field.value);alert('Copied');}
+});
+document.getElementById('back').addEventListener('click',()=>{field.blur();});
+document.getElementById('more').addEventListener('click',()=>{field.focus();});
+app.addEventListener('click',e=>{if(e.target===app||e.target.classList.contains('paper')||e.target.classList.contains('lamp-beam'))field.focus();});
+update();
+</script>
+</body></html>
